@@ -1,0 +1,91 @@
+Das ganze System besteht Software-seitig aus 3 Komponenten.
+Diese Wären:
+
+Cron basierte Bash Skripte
+-Anlegen einer tmpfs Ramdisk  (Skript:  makefs.sh )
+-Setzen der initialen GPIO Stati (Skript: initiate_gpio.sh)
+-Automatisches Auslesen der Temperaturfühler (und schreiben in die Ramdisk) (Skript: RunScript.sh ruft SubReadTempToFile.sh auf)
+-Inhalt der Ramdisk in ein Verzeichnis auf der SD-Karte rsyncen (stündlich)
+
+User-Interface (php & js)
+-Manuelle Kontrolle und Steuerung
+-Vorhandene Daten visualisieren ( canvasjs )
+-Ein Blick in die Box (Raspicam und Webcam)
+
+Automatisches Skript (php) --> wird per Cron jede Minute gestartet
+-Wertet die Sensordaten aus und regelt die Lüfter entsprechend dieser Daten
+-Logging in eine csv-Datei
+
+
+
+Hier mal die Bash-Skripte:
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+[code]
+
+[/code]
+
+
+

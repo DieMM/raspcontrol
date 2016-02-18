@@ -1,0 +1,1 @@
+Date;Temp1;Temp2;Temp3;Temp4;Licht1;Licht2;LTIStufe;UmluftAlt;BoxluftAlt;LTIStufeNeu;BoxLuftNeu;UmluftNeu

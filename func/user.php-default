@@ -1,0 +1,79 @@
+<?php
+
+
+
+
+
+
+
+
+
+
+if(isset($_POST['username'])){
+         
+        // these username and password are just examples, it should be from you database
+        // passwords must be encrypted (salt and hash) to be secured, this post should give you an idea or see the update below
+        $username = 'jaleckmichfett';
+        $password = 'hiermusseinemd5summe rein';
+         
+        // check if the inputted username and password match
+        if($_POST['username']==$username && md5($_POST['password'])==$password){
+             
+            // if it is, set the session value to true
+            $_SESSION['logged_in'] = true;
+	    $_SESSION['loginname'] = $_POST['username'];
+             
+            // and redirect to your site's admin or index page
+            header('Location: index.php');
+             
+        }else{
+         
+            // if it does not match, tell the user his access is denied.
+            echo "<div id='alert alert-info'>Access denied. :(</div>";
+        }
+}
+
+
+
+
+if($_SESSION['logged_in']==true){
+$loggedin = true;
+}else{
+$loggendin = false;
+
+$tmp .= "<div class='alert alert-info'><strong>Login erforderlich!</strong> Ohne Login geht nix.</a></div>";
+$tmp .= "<form method='post'><table class='table table-hover table-responsive table-bordered'>";
+$tmp .= "<tbody><tr>";
+$tmp .= "<td>Username</td><td><input type='text' name='username' class='form-control' required=''></td>";
+$tmp .= "</tr><tr>";
+$tmp .= "<td>Username</td><td><input type='password' name='password' class='form-control' required=''></td>";
+$tmp .= "</tr><tr>";
+$tmp .= "<td></td><td><button type='submit' class='btn btn-primary'><span class='glyphicon glyphicon-plus'></span>Login</button></td>";
+$tmp .= "</tr></tbody></table></form>";
+
+echo $tmp;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+?>

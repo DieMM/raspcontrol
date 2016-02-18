@@ -1,0 +1,287 @@
+Wie angedroht, etwas mehr zu Steuerung /Programmierung.
+Verwendete Tools / Programme:
+-bash
+-php
+-screen
+-wiringPi
+-Cron
+
+Folgende Punkte waren das Ziel meiner Bemühung:
+- Temperatur-Überwachung
+- Licht-Überwachung
+- Steuerung der Innenraum-Lüfter (1/0)
+- Steuerung des LTI (4-Spannungsstufen abgegriffen vom Stufentrafo)
+- Automatische Überwachung sowie die Möglickkeit manuell eingreifen zu können (Control-Panel).
+
+Da der Raspi ja von einer SD-Karte läuft, und diese nicht gerade performant beim Lesen und Schreiben ist, wird beim Booten (über @reboot Cron-Jobs) des Systems eine Ramdisk (tmpfs) gemountet. Ebenso werden die GPIOs in den Grundzustand für mein System gesetzt. Das verwendete Relaisboard schaltet, sobald ein Eingang auf GND gezogen wird, also eine logische 0 anliegt.
+
+[b]Zuerst mal der Part, der völlig unabhängig von der eigentlichen Steuerung läuft[/b]
+
+[code]
+#!/bin/bash
+#
+# Skript: /var/www/html/scada/makefs.sh
+#
+mkdir -p /var/www/html/scada/ramdisk 2>/dev/null
+mount -t tmpfs -o size=30m tmpfs /var/www/html/scada/ramdisk
+[/code]
+
+[code]
+#!/bin/bash
+#
+# SKRIPT: /var/www/html/scada/initiate_gpio.sh
+#
+gpio mode 23 out # LTI 
+gpio mode 24 out # LTI
+gpio mode 25 out # LTI
+gpio mode 27 out # UMLUFT
+gpio mode 28 out # BOXLUFT
+gpio mode 29 out # Reserve
+gpio write 23 1
+gpio write 24 1
+gpio write 25 1
+gpio write 27 1
+gpio write 28 1
+gpio write 29 1
+gpio mode 4 in
+gpio mode 5 in
+[/code]
+
+Im Hintergund läuft eine Screen-Session, die mir die Temperaturdaten der 4 Fühler in 4 Dateien auf der Ramdisk speichern (so kann mein Control-Panel die Daten holen, ohne jedes mal die entsprechenden Sensoren selbst abfragen zu müssen, was durchaus 2-3 Sekunden dauern kann)
+
+[code]
+#!/bin/bash
+#
+# Skript: /var/www/html/scada/scripts/SubReadTempToFile.sh
+#
+while [ true ]
+do
+a=$(timeout 2 cat "/sys/bus/w1/devices/28-000003c4f62a/w1_slave" |grep t | cut -d "=" -f 2)
+if [ "$a" != "" ]
+then
+echo $a > /var/www/html/scada/ramdisk/temp4
+fi
+b=$(timeout 2 cat "/sys/bus/w1/devices/28-0215032ea2ff/w1_slave" |grep t | cut -d "=" -f 2)
+if [ "$b" != "" ]
+then
+echo $b >/var/www/html/scada/ramdisk/temp3
+fi
+c=$(timeout 2 cat "/sys/bus/w1/devices/28-000003c4f963/w1_slave" |grep t | cut -d "=" -f 2)
+if [ "$c" != "" ]
+then
+echo $c >/var/www/html/scada/ramdisk/temp1
+fi
+d=$(timeout 2 cat "/sys/bus/w1/devices/28-021503c021ff/w1_slave" |grep t | cut -d "=" -f 2)
+if [ "$d" != "" ]
+then
+echo $d >/var/www/html/scada/ramdisk/temp2
+fi
+sleep 7
+done
+[/code]
+
+Dieses Skript wird durch ein weiteres, per @reboot-Cron abgefeuertes Skript initialisiert.
+Dabei wird zuerst geprüft, ob das System schon länger als 30 Sekunden angeschaltet ist (der Bootvorgang brauch ja etwas Zeit und auch das Einbinden der 1-wire Sensoren im Filesystem benötigt ein paar Sekunden)
+
+[code]
+#!/bin/bash
+UT=$(cat /proc/uptime | cut -d "." -f 1)
+if [ $UT -lt 30 ]
+then
+sleep 30
+fi
+
+SCRIPT1="/var/www/html/scada/scripts/SubReadTempToFile.sh"
+screen -dmS TempReadOut $SCRIPT1
+[/code]
+
+Damit hätten wir als zu jeder Zeit die aktuellen Temperaturwerte in den Dateien
+/var/www/html/scada/ramdisk/temp1 bis /var/www/html/scada/ramdisk/temp4
+abgelegt und die GPIOs sind im Grundzustand (LTI auf höchster Stufe, Umluftventis sowie meine Ansaugbox-Belüftung sind aus)
+
+
+[b]Dann kommen wir mal zum Control-Teil (in php gehalten).[/b]
+
+Zuerst haben wir mal eine config.php
+
+[code]
+<?php
+/////////////////////////////////
+// Main
+
+$ramdisk = "/var/www/html/scada/ramdisk";
+
+//
+$mainlog = $ramdisk ."/output.log";
+$maincsv = $ramdisk ."/output.csv";
+$alarmlog = $ramdisk ."/alarm.log";
+
+//Sensoren
+// 0 = innen links oben
+// 1 = innen rechts oben
+// 2 = Luftdurchgang links -> rechts
+// 3 = Luftbox
+
+$sensor[3] = "/sys/bus/w1/devices/28-000003c4f62a/w1_slave"; // box
+$sensor[2] = "/sys/bus/w1/devices/28-0215032ea2ff/w1_slave"; // durchgang
+$sensor[0] = "/sys/bus/w1/devices/28-000003c4f963/w1_slave"; // links
+$sensor[1] = "/sys/bus/w1/devices/28-021503c021ff/w1_slave"; // rechs
+
+
+
+///////////////////////////////
+//limits
+$mintemp = 18;
+$maxtemp = 28;
+$steplimit[1] = 22; 
+$steplimit[2] = 25; 
+$steplimit[3] = 28; // wenn eine Innenraumtemperatur grösser ist, wird der LTI auf Vollgas betrieben (Stufe)
+$boxlimit = 25;     // wenn die Temperatur in der Ansaugbox grösser ist, wir die Box-Zwangsbeatmung eingeschaltet
+
+$stepsensors=array(0,1,2); // welche Temperatursensoren sind im Growraum 
+$boxsensor = 3;  //welche Temperatursensor ist in der Ansaug-Box
+
+
+// Lichtsensor 
+$lightsensor[0] = "4";
+$lightsensor[1] = "5";
+
+//LTI
+$lti = array("23","24","25");
+$ltiStufe[0] = array("23","24","25");   // ---> 
+$ltiStufe[1] = array("23","24");
+$ltiStufe[2] = array("23");
+$deaktiv = 1;
+$aktiv = 0;
+
+//Umluft 
+$umluft = "27";
+$umluftdauer = 10;   // 
+$umluftanmod = 15;   // (jede x. Miute wird der Luefter fuer y minuten umluftdauer angeworfen
+$umluftscript = "/var/www/html/scada/func/umluft_an.sh"; // PIN DAUER NEUERWERT
+
+//27 28
+//Boxbeluefter
+$boxluft = "28";
+
+?>
+[/code]
+
+Darin sind alle Sensoren konfiguriert (Temp 1- 4, Licht 1-2), sowie die Regelgrenzen.
+Im Umluft-Teil ist eingestellt, alle wievielte Minute die Innenraumlüfter für wie lange angeworfen werden sollen.
+
+Diese Config wird sowohl von der Automatik als auch vom Control-Panel verwendet.
+Genauso ergeht es folgendem Skript:
+
+[code]
+<?php
+///////////////////////////////////////////////
+function fSet($gpio,$value){
+exec ( "gpio write $gpio $value", $status );
+return $status[0];
+}
+
+///////////////////////////////////////////////
+function LTIForm($status=4){
+$tmp = "<form method='post'><input type='hidden' name='action' value='1'>";
+$tmp .= "<input type='hidden' name='func' value='lti'>";
+$tmp .= "<select name='val' class='form-control'>";
+for ($x=1;$x <5;$x++){
+	$sel="";
+		if ($status == $x) $sel='selected="selected"';
+	$tmp .= "<option value='$x' $sel >$x</option>";
+}
+$tmp .= "</select>";
+//$tmp .= "<input type='submit' value='LTI Umstufen' class='form-control'></form>";
+$tmp .= "<button type='submit' class='btn btn-primary'>LTI Umstufen</button></form>";
+return $tmp;
+}
+//////////////////////////////////////////////
+function LuefterButton($luefter,$status){
+if ($status == 1){
+	$label = "Ausschalten";
+	$pic = "btn-success";
+	$img = "<img src='img/VentiOn.gif'>";
+	$neu = 0;
+}else{
+	$neu = 1;
+	$label = "Einschalten";
+	$pic = "btn-danger";
+	$img = "<img src='img/VentiOff.gif'>";
+}
+$tmp = "<form method='post'><input type='hidden' name='action' value='1'>";
+$tmp .= "<input type='hidden' name='func' value='$luefter'>";
+$tmp .= "<input type='hidden' name='val' value='$neu'>$img";
+$tmp .= "<button type='submit' class='btn $pic'>$label</button></form>";
+return $tmp;
+}
+////////////////////////////////////////////////
+function fGetLightIndicator($value){
+if ($value == 1) $tmp = "<img src='img/LightOn.jpg' alt='light on' width='31' height='45'>";
+if ($value == 0) $tmp = "<img src='img/LightOff.jpg' alt='light off'  width='31' height='45'>";
+return $tmp;
+}
+
+
+//////////////////////////////////////////////
+function fGetCachedTemp($id){
+exec("cat /var/www/html/scada/ramdisk/temp" . $id , $status);
+$res = $status[0] / 1000;
+return $res;
+
+}
+//////////////////////////////////////////////
+function fReadTemp($sensor){
+$raw = file_get_contents($sensor);
+$raw = str_replace("\n", "", $raw);
+$boom = explode('t=',$raw);
+return floatval($boom[1]/1000);
+}
+//////////////////////////////////////////////
+function fReadLight($gpio){
+exec ( "gpio read $gpio", $status );
+return $status[0];
+}
+//////////////////////////////////////////////
+function fGetLTI(){
+global $deaktiv;
+global $lti , $ltiStufe;
+for ($x = 0;$x < count($lti);$x++){
+$pin = $lti[$x];
+exec ( "gpio read $pin", $status );
+}
+if ($status[0] == $deaktiv) return 4;
+if ($status[1] == $deaktiv) return 3;
+if ($status[2] == $deaktiv) return 2;
+return 1;
+}
+//////////////////////////////////////////////
+function fGetUmluft(){
+global $umluft;
+exec ( "gpio read $umluft", $status );
+if ($status[0] == 0){
+return 1;
+}else{
+return 0;
+}
+}
+//////////////////////////////////////////////
+function fGetBoxluft(){
+global $boxluft;
+exec ( "gpio read $boxluft", $status );
+if ($status[0] == 0){
+return 1;
+}else{
+return 0;
+}
+}
+
+
+
+?>
+[/code]
+
+
+
+
+
