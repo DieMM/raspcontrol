@@ -20,6 +20,7 @@ function fGetTempSensors(){
 function fGetCachedTemp($id){
 exec("cat /var/www/html/scada/ramdisk/temp" . $id , $status);
 $res = $status[0] / 1000;
+return floatval($status[0]/1000);
 return $res;
 
 }

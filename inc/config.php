@@ -20,6 +20,7 @@ $sensor[3] = "/sys/bus/w1/devices/28-000003c4f62a/w1_slave"; // box
 $sensor[2] = "/sys/bus/w1/devices/28-0215032ea2ff/w1_slave"; // durchgang
 $sensor[0] = "/sys/bus/w1/devices/28-000003c4f963/w1_slave"; // links
 $sensor[1] = "/sys/bus/w1/devices/28-021503c021ff/w1_slave"; // rechs
+$sensor[4] = "/sys/bus/w1/devices/28-031504f8ccff/w1_slave"; //led panel
 
 
 /*
@@ -33,9 +34,9 @@ $sensor[3] = "/sys/bus/w1/devices/28-021503c021ff/w1_slave";
 $mintemp = 18;
 $maxtemp = 28;
 $steplimit[1] = 22;
-$steplimit[2] = 25;
-$steplimit[3] = 28;
-$boxlimit = 20;
+$steplimit[2] = 24;
+$steplimit[3] = 26;
+$boxlimit = 19;
 
 $stepsensors=array(0,1,2);
 $boxsensor = 3;
@@ -55,7 +56,7 @@ $ltiStufe[1] = array("23","24");
 $ltiStufe[2] = array("23");
 $deaktiv = 1;
 $aktiv = 0;
-$ltimin = 1;
+$ltimin = 2;
 
 
 //Umluft 

@@ -31,6 +31,7 @@ $t1 = fGetCachedTemp(1);
 $t2 = fGetCachedTemp(2);
 $t3 = fGetCachedTemp(3);
 $t4 = fGetCachedTemp(4);
+$t5 = fGetCachedTemp(5);
 
 
 $l1 = fGetLightIndicator(fReadLight($lightsensor[0]));
@@ -79,7 +80,8 @@ echo "<td width='100%'>";
 echo "<table width='100%' border='0'>";
 echo "<tr height='100px'>";
 echo "<td width='20%'></td>";
-echo "<td width='70%' id='licht1' align='center'>".$l1."</td>";
+echo "<td width='10%' id='temp5' align='center' style='color:blue;font-size:20px'>$t5</td>";
+echo "<td width='60%' id='licht1' align='center'>".$l1."</td>";
 echo "<td width='10%'></td>";
 echo "</tr>";
 

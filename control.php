@@ -31,6 +31,7 @@ $t1 = fGetCachedTemp(1);
 $t2 = fGetCachedTemp(2);
 $t3 = fGetCachedTemp(3);
 $t4 = fGetCachedTemp(4);
+$t5 = fGetCachedTemp(5);
 
 
 $l1 = fGetLightIndicator(fReadLight($lightsensor[0]));
@@ -43,10 +44,11 @@ $bl = fGetBoxluft();
 echo "<table class='table'>";
 echo "<th>Sensor</th><th>Wert</th>";
 
-echo "<tr><td>Temperatur 1</td><td id='temp1'>$t1</td></tr>";
-echo "<tr><td>Temperatur 2</td><td id='temp2'>$t2</td></tr>";
-echo "<tr><td>Temperatur 3</td><td id='temp3'>$t3</td></tr>";
-echo "<tr><td>Temperatur 4</td><td id='temp4'>$t4</td></tr>";
+echo "<tr><td>Links 1</td><td id='temp1'>$t1</td></tr>";
+echo "<tr><td>Rechts 2</td><td id='temp2'>$t2</td></tr>";
+echo "<tr><td>Durchgang 3</td><td id='temp3'>$t3</td></tr>";
+echo "<tr><td>Luftbox </td><td id='temp4'>$t4</td></tr>";
+echo "<tr><td>Temperatur LED</td><td id='temp5'>$t5</td></tr>";
 
 echo "<tr><td>Licht 1</td><td id='licht1'>$l1</td></tr>";
 echo "<tr><td>Licht 2</td><td id='licht2'>$l2</td></tr>";

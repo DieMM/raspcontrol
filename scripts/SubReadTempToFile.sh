@@ -24,6 +24,13 @@ then
 echo $d >/var/www/html/scada/ramdisk/temp2
 fi
 
+#28-031504f8ccff
+d=$(timeout 2 cat "/sys/bus/w1/devices/28-031504f8ccff/w1_slave" |grep t | cut -d "=" -f 2)
+if [ "$d" != "" ]
+then
+echo $d >/var/www/html/scada/ramdisk/temp5
+fi
+
 
 sleep 7
 done

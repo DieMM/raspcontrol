@@ -21,6 +21,7 @@ $t1 = fGetCachedTemp(1);
 $t2 = fGetCachedTemp(2);
 $t3 = fGetCachedTemp(3);
 $t4 = fGetCachedTemp(4);
+$t5 = fGetCachedTemp(5);
 $l1 = fGetLightIndicator(fReadLight($lightsensor[0]));
 $l2 = fGetLightIndicator(fReadLight($lightsensor[1]));
 $ltistatus = fGetLTI();

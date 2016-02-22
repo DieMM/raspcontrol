@@ -27,6 +27,7 @@ $(document).ready(function () {
                         var dataPoints2= [];
                         var dataPoints3= [];
                         var dataPoints4= [];
+                        var dataPoints5= [];
 			var Licht1= [];
 			var Licht2= [];
 			var LTI= [];
@@ -51,28 +52,32 @@ $(document).ready(function () {
                                 var rowData = allLinesArray[i].split(';');
                                 dataPoints4.push({label:rowData[0],y:parseFloat(rowData[4])});
                         }
-
                         for (var i = 1; i <= allLinesArray.length-1; i++) {
                                 var rowData = allLinesArray[i].split(';');
-                                Licht1.push({label:rowData[0],y:parseFloat(rowData[5])+2.3});
-                        }
-                        for (var i = 1; i <= allLinesArray.length-1; i++) {
-                                var rowData = allLinesArray[i].split(';');
-                                Licht2.push({label:rowData[0],y:parseFloat(rowData[6])+2.7});
+                                dataPoints5.push({label:rowData[0],y:parseFloat(rowData[5])});
                         }
 
                         for (var i = 1; i <= allLinesArray.length-1; i++) {
                                 var rowData = allLinesArray[i].split(';');
-                                LTI.push({label:rowData[0],y:parseFloat(rowData[7])});
+                                Licht1.push({label:rowData[0],y:parseFloat(rowData[6])+2.3});
+                        }
+                        for (var i = 1; i <= allLinesArray.length-1; i++) {
+                                var rowData = allLinesArray[i].split(';');
+                                Licht2.push({label:rowData[0],y:parseFloat(rowData[7])+2.7});
                         }
 
                         for (var i = 1; i <= allLinesArray.length-1; i++) {
                                 var rowData = allLinesArray[i].split(';');
-                                umluft.push({label:rowData[0],y:parseFloat(rowData[8])+0.6});
+                                LTI.push({label:rowData[0],y:parseFloat(rowData[8])});
+                        }
+
+                        for (var i = 1; i <= allLinesArray.length-1; i++) {
+                                var rowData = allLinesArray[i].split(';');
+                                umluft.push({label:rowData[0],y:parseFloat(rowData[9])+0.6});
                         }
                         for (var i = 1; i <= allLinesArray.length-1; i++) {
                                 var rowData = allLinesArray[i].split(';');
-                                boxluft.push({label:rowData[0],y:parseFloat(rowData[9])+0.3});
+                                boxluft.push({label:rowData[0],y:parseFloat(rowData[10])+0.3});
                         }
 
 /////////////////////////////////////////////////////////////////////
@@ -126,6 +131,13 @@ $(document).ready(function () {
 			legendText: "Ansaugbox",
 			showInLegend: true,
 			toolTipContent: "Luftbox: {y} - {label}",
+                },                
+		{
+                        type: "line",
+                        dataPoints: dataPoints5,
+			legendText: "LED Leiste",
+			showInLegend: true,
+			toolTipContent: "LED Leiste: {y} - {label}",
                 }],
 
 
