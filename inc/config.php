@@ -36,10 +36,8 @@ $maxtemp = 28;
 $steplimit[1] = 22;
 $steplimit[2] = 24;
 $steplimit[3] = 26;
-$boxlimit = 19;
 
-$boxlim['licht1'] = 16;
-$boxlim['licht2'] = 19;
+$boxlim['temp1'] = 15;  // ist an Temp1 diese Temperatur unterschritten, gehts auf Umluft
 
 $stepsensors=array(0,1,2);
 $boxsensor = 3;

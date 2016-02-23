@@ -82,20 +82,13 @@ $ltiistneu = fGetLTI();
 $logline .= ";" .  $ltiistneu ;
 ///////////////////////////////
 //Box-Luefter
-$boxtemp = $temp[$boxsensor];
-if ($boxtemp > $boxlimit){
+$boxtemp = $t1;
+if ($boxtemp < $boxlim['temp1']){
 $blsoll = 1;
 }else{
 $blsoll = 0;
 }
 
-if ($licht1 == 1){
-if ($boxtemp > $boxlim['licht1']){
-$blsoll = 1;
-}else{
-$blsoll = 0;
-}
-}
 
 
 
