@@ -38,6 +38,9 @@ $steplimit[2] = 24;
 $steplimit[3] = 26;
 $boxlimit = 19;
 
+$boxlim['licht1'] = 16;
+$boxlim['licht2'] = 19;
+
 $stepsensors=array(0,1,2);
 $boxsensor = 3;
 
@@ -56,12 +59,12 @@ $ltiStufe[1] = array("23","24");
 $ltiStufe[2] = array("23");
 $deaktiv = 1;
 $aktiv = 0;
-$ltimin = 2;
+$ltimin = 1;
 
 
 //Umluft 
 $umluft = "27";
-$umluftdauer = 10;   // 
+$umluftdauer = 12;   //
 $umluftanmod = 15;   // (jede x. Miute wird der Luefter fuer umluftdauer angeworfen
 $umluftscript = "/var/www/html/scada/func/umluft_an.sh"; // PIN DAUER NEUERWERT
 

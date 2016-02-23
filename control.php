@@ -91,7 +91,7 @@ $( document ).ready(function() {
 
         setInterval(function() {
             myFunction();
-        }, 10000);
+        }, 5000);
 //myFunction();
 
 });

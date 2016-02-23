@@ -89,6 +89,16 @@ $blsoll = 1;
 $blsoll = 0;
 }
 
+if ($licht1 == 1){
+if ($boxtemp > $boxlim['licht1']){
+$blsoll = 1;
+}else{
+$blsoll = 0;
+}
+}
+
+
+
 if ($boxluftist != $blsoll){
 if ($blsoll == 1) $blset = 0;
 if ($blsoll == 0) $blset = 1;
